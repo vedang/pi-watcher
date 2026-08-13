@@ -35,7 +35,7 @@ const DEFAULT_MARKER = "AI";
 
 function buildMarkerRegex(marker: string): RegExp {
   const escaped = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(^|\\s)(${escaped}(?:[!?]|\\.))(?=$|[^A-Za-z0-9_])`, "gi");
+  return new RegExp(`(^|\\s)(${escaped}(?:[!?]|\.))(?=$|[^A-Za-z0-9_])`, "gi");
 }
 
 function normalizeCommentPrefix(prefix: string): string {
@@ -107,7 +107,9 @@ export function findLineComment(line: string): ParsedCommentLine | null {
       }
 
       const preceding = line.slice(0, prefixStart);
-      if (preceding.trim() !== "") {
+      // Allow semicolons when there is whitespace before them (e.g. "(foo) ; comment").
+      // Only skip when the semicolons immediately follow non-whitespace with no separating space.
+      if (preceding.trim() !== "" && !/\s$/.test(preceding)) {
         continue;
       }
 
